@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Health Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(-45deg, #d4f7d4, #ffffff, #bdf5c4, #e0ffe6);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background 0.5s;
+        }
+        .dark-mode {
+            background: #0f172a !important;
+            color: white !important;
+        }
+        .dark-mode .bg-white { background-color: #1e293b !important; color: white; }
+        .dark-mode .text-gray-500, .dark-mode .text-gray-400 { color: #94a3b8 !important; }
+        
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        .card-hover:hover {
+            transform: translateY(-6px);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+        /* Toast Animation */
+        .toast-enter { transform: translateX(120%); }
+        .toast-show { transform: translateX(0); }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+<div id="notificationContainer" class="fixed top-20 right-6 z-[100] flex flex-col gap-3 w-72 pointer-events-none"></div>
+
+<header class="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-green-600 text-white flex items-center justify-center rounded-xl font-bold">HC</div>
+            <div>
+                <h1 class="font-bold text-green-700 text-lg">HealthCare Portal</h1>
+                <p class="text-xs text-gray-500">Patient Dashboard</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleDarkMode()" class="bg-gray-200 px-3 py-1 rounded-full text-sm">🌙 Mode</button>
+            <div class="text-right">
+                <p class="text-sm">Welcome, <span class="font-semibold text-green-700">{{ username }}</span></p>
+                <p class="text-xs text-gray-500" id="liveTime"></p>
+            </div>
+            <a href="{{ url_for('logout') }}" class="bg-red-100 text-red-600 px-4 py-2 rounded-full hover:bg-red-200 transition text-sm">Logout</a>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 shadow card-hover">
+            <h3 class="text-sm text-gray-500">Next Appointment</h3>
+            <p class="text-xl font-bold text-green-700">Dr. Sharma</p>
+            <p class="text-sm text-gray-500">30 April, 10:00 AM</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow card-hover">
+            <h3 class="text-sm text-gray-500">Pending Reports</h3>
+            <p class="text-xl font-bold text-blue-600">3 Reports</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-6 shadow card-hover">
+            <h3 class="text-sm text-red-500">Emergency</h3>
+            <a href="{{ url_for('emergency') }}" class="text-lg font-bold text-red-600 hover:underline">Get Help →</a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm mb-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-green-700">My Daily Schedule</h3>
+                <p class="text-xs text-gray-400">Set medication or activity reminders</p>
+            </div>
+            <button onclick="toggleTaskForm()" class="bg-green-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                + Add New Task
+            </button>
+        </div>
+
+        <div id="taskForm" class="hidden mb-6 p-4 bg-green-50 rounded-xl border border-green-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input type="text" id="taskDesc" placeholder="e.g. Morning Insulin" class="p-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+                <input type="time" id="taskTime" class="p-2 text-sm border rounded-lg outline-none">
+                <button onclick="addTask()" class="bg-green-700 text-white p-2 rounded-lg text-sm font-bold">Save Reminder</button>
+            </div>
+        </div>
+
+        <div id="taskList" class="space-y-4">
+            <p id="emptyMsg" class="text-center text-gray-400 text-sm py-4">No tasks set for today.</p>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+        <a href="{{ url_for('symptom_checker') }}" class="bg-white rounded-2xl p-6 shadow card-hover text-center">🩺 Symptom Checker</a>
+        <a href="{{ url_for('appointments') }}" class="bg-white rounded-2xl p-6 shadow card-hover text-center">📅 Appointments</a>
+        <a href="{{ url_for('records') }}" class="bg-white rounded-2xl p-6 shadow card-hover text-center">📂 Medical Records</a>
+        <a href="{{ url_for('health_tips') }}" class="bg-white rounded-2xl p-6 shadow card-hover text-center">🌿 Health Tips</a>
+        <a href="{{ url_for('prescriptions') }}" class="bg-white rounded-2xl p-6 shadow card-hover text-center">💊 Prescriptions</a>
+        <a href="{{ url_for('emergency') }}" class="bg-red-50 border border-red-200 rounded-2xl p-6 shadow card-hover text-red-600 text-center font-bold">🚨 Emergency</a>
+    </div>
+
+</main>
+
+<div id="chatBox" class="fixed bottom-6 right-6 w-80 bg-white shadow-2xl rounded-2xl p-4 hidden z-50">
+    <h3 class="font-bold text-green-700">AI Health Assistant</h3>
+    <div id="chatMessages" class="h-40 overflow-y-auto text-sm my-2 border-b"></div>
+    <input type="text" id="chatInput" placeholder="Ask something..." class="w-full border rounded-lg px-2 py-1 text-sm mt-2 outline-none">
+</div>
+
+<button onclick="toggleChat()" class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-full shadow-lg z-50">💬</button>
+
+<script>
+    // --- State Management ---
+    let userTasks = [];
+
+    // --- Notifications Logic ---
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+
+    function showToast(message, title = "Reminder") {
+        const container = document.getElementById('notificationContainer');
+        const toast = document.createElement('div');
+        toast.className = "pointer-events-auto bg-white border-l-4 border-green-600 shadow-xl rounded-lg p-4 transition-all duration-500 toast-enter";
+        toast.innerHTML = `
+            <div class="flex items-start">
+                <span class="text-green-600 font-bold">🔔</span>
+                <div class="ml-3">
+                    <p class="text-xs font-bold text-gray-900">${title}</p>
+                    <p class="text-xs text-gray-600">${message}</p>
+                </div>
+            </div>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('toast-show'), 100);
+        setTimeout(() => {
+            toast.classList.replace('toast-show', 'opacity-0');
+            setTimeout(() => toast.remove(), 500);
+        }, 5000);
+    }
+
+    // --- Task Logic ---
+    function toggleTaskForm() {
+        document.getElementById('taskForm').classList.toggle('hidden');
+    }
+
+    function addTask() {
+        const desc = document.getElementById('taskDesc').value;
+        const time = document.getElementById('taskTime').value;
+
+        if (!desc || !time) {
+            alert("Fill in all fields");
+            return;
+        }
+
+        const task = { id: Date.now(), desc, time, completed: false, notified: false };
+        userTasks.push(task);
+        renderTasks();
+        showToast(`${desc} scheduled for ${time}`, "Success");
+        
+        document.getElementById('taskDesc').value = '';
+        document.getElementById('taskTime').value = '';
+        toggleTaskForm();
+    }
+
+    function renderTasks() {
+        const list = document.getElementById('taskList');
+        const empty = document.getElementById('emptyMsg');
+        list.innerHTML = "";
+        
+        if(userTasks.length === 0) {
+            empty.classList.remove('hidden');
+            list.appendChild(empty);
+            return;
+        }
+        empty.classList.add('hidden');
+
+        userTasks.sort((a,b) => a.time.localeCompare(b.time)).forEach(task => {
+            const div = document.createElement('div');
+            div.className = `flex items-center justify-between p-3 bg-gray-50 rounded-xl border ${task.completed ? 'opacity-50' : ''}`;
+            div.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="completeTask(${task.id})" class="w-5 h-5 accent-green-600">
+                    <div>
+                        <p class="text-sm font-semibold ${task.completed ? 'line-through' : ''}">${task.desc}</p>
+                        <p class="text-[10px] font-mono text-gray-500">${task.time}</p>
+                    </div>
+                </div>
+                <button onclick="deleteTask(${task.id})" class="text-red-400 text-xs hover:underline">Delete</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function completeTask(id) {
+        const task = userTasks.find(t => t.id === id);
+        if(task) task.completed = !task.completed;
+        renderTasks();
+    }
+
+    function deleteTask(id) {
+        userTasks = userTasks.filter(t => t.id !== id);
+        renderTasks();
+    }
+
+    // --- Heartbeat: Check Time Every 30s ---
+    setInterval(() => {
+        const now = new Date();
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0');
+
+        userTasks.forEach(task => {
+            if (task.time === currentTime && !task.notified && !task.completed) {
+                showToast(`It's time for: ${task.desc}`, "Health Alert");
+                if (Notification.permission === "granted") {
+                    new Notification("HealthCare Reminder", { body: `Time for ${task.desc}` });
+                }
+                task.notified = true; // Prevents double alerts
+            }
+        });
+    }, 30000);
+
+    // --- UI Controls ---
+    setInterval(() => { document.getElementById("liveTime").innerHTML = new Date().toLocaleString(); }, 1000);
+    function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
+    function toggleChat() { document.getElementById("chatBox").classList.toggle("hidden"); }
+
+    document.getElementById("chatInput").addEventListener("keypress", function(e){
+        if(e.key === "Enter"){
+            let msg = this.value;
+            let box = document.getElementById("chatMessages");
+            box.innerHTML += `<p class='mb-2'><b>You:</b> ${msg}</p>`;
+            setTimeout(() => {
+                box.innerHTML += `<p class='mb-2 text-green-600'><b>AI:</b> I've noted that. Remember to check your schedule!</p>`;
+                box.scrollTop = box.scrollHeight;
+            }, 500);
+            this.value="";
+        }
+    });
+</script>
+
+</body>
+</html>

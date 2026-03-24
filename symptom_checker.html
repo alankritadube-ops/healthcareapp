@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Symptom Checker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background-image:url("https://images.unsplash.com/photo-1581595219315-a187dd40c322");
+background-size:cover;
+background-position:center;
+}
+
+.container{
+background:white;
+padding:40px;
+width:420px;
+border-radius:18px;
+box-shadow:0 10px 35px rgba(0,0,0,0.15);
+}
+
+h2{
+text-align:center;
+margin-bottom:25px;
+color:#2c3e50;
+}
+
+.symptom-list{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:25px;
+}
+
+.symptom{
+background:#f5f7fa;
+padding:10px;
+border-radius:10px;
+cursor:pointer;
+transition:0.3s;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.symptom:hover{
+background:#e3fdfd;
+transform:scale(1.03);
+}
+
+input[type="checkbox"]{
+accent-color:#00b894;
+cursor:pointer;
+}
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:linear-gradient(90deg,#00b894,#00cec9);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.result{
+margin-top:25px;
+padding:18px;
+border-radius:12px;
+background:linear-gradient(120deg,#e0fff7,#c9f7f5);
+border-left:6px solid #00b894;
+}
+
+.result h3{
+color:#00695c;
+margin-bottom:8px;
+}
+
+.result p{
+font-weight:500;
+color:#2c3e50;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🩺 Symptom Checker</h2>
+
+<form method="POST">
+
+<div class="symptom-list">
+
+<label class="symptom"><input type="checkbox" name="symptoms" value="fever"> Fever</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="cough"> Cough</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="body pain"> Body Pain</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="sneezing"> Sneezing</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="runny nose"> Runny Nose</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="loss of smell"> Loss of Smell</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="chills"> Chills</label>
+<label class="symptom"><input type="checkbox" name="symptoms" value="sweating"> Sweating</label>
+
+</div>
+
+<button type="submit">🔍 Check Diagnosis</button>
+
+</form>
+
+{% if disease %}
+<div class="result">
+<h3>Possible Disease: <strong>{{ disease }}</strong></h3>
+<p>Accuracy: <strong>{{ accuracy }}%</strong></p>
+</div>
+{% endif %}
+
+</div>
+
+</body>
+</html>
